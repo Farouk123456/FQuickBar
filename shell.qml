@@ -1,3 +1,4 @@
+pragma ComponentBehavior: Bound
 import Quickshell
 import Quickshell.Io
 import QtQuick 
@@ -12,6 +13,7 @@ Variants {
             property string fontFamily: "JetBrainsMono Nerd Font"
             property int fontSize: 12
             required property var modelData
+            property int activeWS: 1
 
             screen: modelData
             color: "transparent"
@@ -25,21 +27,65 @@ Variants {
                     color: "#c0c0c0"
                 }
             }
-
-            Rectangle {
-                color: '#5ed7a1'
-                implicitWidth: 15
-                implicitHeight: 25
-                x: 12.5
-                y: 5
-                radius: 4
-
-                Text {
-                    anchors.centerIn: parent
-                    font { family: root.fontFamily; pixelSize: root.fontSize }
-                    color: "#000"
-                    text: "1"
+            
+            Repeater {
+                model: ScriptModel {
+                    id: ff
+                    values: JSON.parse("[{\"key\":\"2\",\"name\":\"2\",\"monitor\":1},{\"key\":\"3\",\"name\":\"3\",\"monitor\":1}]");
                 }
+
+                delegate:  Rectangle {
+                    id: ws
+                    required property var modelData
+                    required property int index
+
+                    color: (ws.modelData.key == root.activeWS) ? '#5ed7a1' : "#c0c0c0"
+                    implicitWidth: 15
+                    implicitHeight: 25
+                    
+                    x: 12.5 + 18 * index
+                    y: 5
+                    radius: 4
+
+                    Text {
+                        anchors.centerIn: parent
+                        font { family: root.fontFamily; pixelSize: root.fontSize }
+                        color: "#000"
+                        text: ws.modelData.name
+                    }
+                }
+            }
+
+            Process {
+                id: get
+                command: ["bash", "/home/farouk/Documents/QuickShell/getWorkspaces.sh"]
+                running: true
+                stdout: StdioCollector {
+                    onStreamFinished: ff.values = JSON.parse(this.text)
+                }
+            }
+
+            Timer {
+                interval: 100
+                running: true
+                repeat: true
+                onTriggered: get.running = true
+            }
+
+            Process {
+                id: getAWS
+                command: ["bash", "/home/farouk/Documents/QuickShell/getActiveWS.sh"]
+                running: true
+                stdout: StdioCollector {
+                    onStreamFinished: root.activeWS = this.text
+                }
+            }
+
+            Timer {
+                interval: 100
+                running: true
+                repeat: true
+                onTriggered: getAWS.running = true
             }
 
             anchors {
