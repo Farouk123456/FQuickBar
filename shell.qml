@@ -1,8 +1,14 @@
+//@ pragma UseQApplication
+//@ pragma IconTheme candy-icons
 pragma ComponentBehavior: Bound
+
 import Quickshell
+import Quickshell.Services.SystemTray
+import Quickshell.Widgets
 import Quickshell.Hyprland
 import Quickshell.Io
 import QtQuick 
+
 
 Variants {
     model: Quickshell.screens;
@@ -21,7 +27,7 @@ Variants {
             
             Rectangle {
                 color: root.colBg
-                radius: 15
+                radius: root.reqHeight / 2
                 anchors.fill: parent
                 border {
                     width: 2
@@ -149,6 +155,56 @@ Variants {
                     repeat: true
                     onTriggered: dateProc.running = true
                 }
+            }
+        
+            Row {
+                Repeater {
+                    model: SystemTray.items
+
+                    delegate: Image {
+                        id: img
+                        required property var modelData
+                        required property int index
+
+                        source: modelData.icon
+
+                        height: 25
+                        fillMode: Image.PreserveAspectFit
+                        
+                        QsMenuAnchor {
+                            id: menuAnchor
+                            menu: img.modelData.menu
+                            anchor {
+                                item: img                          // anchor to the icon, not the cursor
+                                edges: Edges.Bottom | Edges.Right    // anchor point = icon's bottom-left corner
+                                gravity: Edges.Bottom | Edges.Left // menu grows down+right from that point
+                                adjustment: PopupAdjustment.Slide   // slide (not flip) if it'd go offscreen
+                            }
+                        }
+
+                        MouseArea {
+                            anchors.fill: parent
+                            hoverEnabled: true
+                            acceptedButtons: Qt.LeftButton | Qt.RightButton
+                            onClicked: (mouse) => {
+                                if (mouse.button == Qt.RightButton) 
+                                {
+                                    menuAnchor.anchor.rect.x = mouse.x
+                                    menuAnchor.anchor.rect.y = mouse.y
+                                    menuAnchor.open()
+                                }
+                                else
+                                {
+                                    img.modelData.activate()
+                                }
+                            }
+                        }
+                    }
+                }
+                
+                anchors.right: parent.right
+                anchors.verticalCenter: parent.verticalCenter
+                anchors.rightMargin: 12.5
             }
         }
     }
