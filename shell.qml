@@ -1,5 +1,6 @@
 pragma ComponentBehavior: Bound
 import Quickshell
+import Quickshell.Hyprland
 import Quickshell.Io
 import QtQuick 
 
@@ -27,8 +28,26 @@ Variants {
                     color: "#c0c0c0"
                 }
             }
-            
+
+            anchors {
+                top: true
+                left: true
+                right: true
+            }
+
+            implicitHeight: root.reqHeight
+
+            margins {
+                top: 2
+                bottom: 2
+                left: 10
+                right: 10
+            }
+
+
+            // Workspace Widget
             Repeater {
+                id: rep
                 model: ScriptModel {
                     id: ff
                     values: JSON.parse("[{\"key\":\"2\",\"name\":\"2\",\"monitor\":1},{\"key\":\"3\",\"name\":\"3\",\"monitor\":1}]");
@@ -39,7 +58,7 @@ Variants {
                     required property var modelData
                     required property int index
 
-                    color: (ws.modelData.key == root.activeWS) ? '#5ed7a1' : "#c0c0c0"
+                    color: (msArea.containsMouse) ? (ws.modelData.key == root.activeWS) ?  '#3eb781' : "#a0a0a0" : (ws.modelData.key == root.activeWS) ? '#5ed7a1' : "#c0c0c0"
                     implicitWidth: 15
                     implicitHeight: 25
                     
@@ -53,9 +72,27 @@ Variants {
                         color: "#000"
                         text: ws.modelData.name
                     }
+
+                    MouseArea {
+                        id: msArea
+                        anchors.fill: parent
+                        hoverEnabled: true
+                        onPressed: {
+                            Hyprland.dispatch("hl.dsp.focus({ workspace = " + ws.modelData.key + " })")
+                        }
+
+                        onWheel: {
+                            if (wheel.angleDelta.y > 0) {
+                               Hyprland.dispatch("hl.dsp.focus({ workspace = \"e+1\" })")
+                            } else if (wheel.angleDelta.y < 0) {
+                                Hyprland.dispatch("hl.dsp.focus({ workspace = \"e-1\" })")
+                            }
+                        }
+                    }
                 }
             }
-
+            
+            // Polls for Workspacewidget
             Process {
                 id: get
                 command: ["bash", "/home/farouk/Documents/QuickShell/getWorkspaces.sh"]
@@ -88,21 +125,9 @@ Variants {
                 onTriggered: getAWS.running = true
             }
 
-            anchors {
-                top: true
-                left: true
-                right: true
-            }
 
-            implicitHeight: root.reqHeight
 
-            margins {
-                top: 2
-                bottom: 2
-                left: 10
-                right: 10
-            }
-
+            // Date Clock
             Text {
                 id: clock
                 anchors.centerIn: parent
