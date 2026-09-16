@@ -1,11 +1,10 @@
 //@ pragma UseQApplication
-//@ pragma IconTheme candy-icons
 pragma ComponentBehavior: Bound
 
 import Quickshell
 import Quickshell.Services.SystemTray
-import Quickshell.Widgets
 import Quickshell.Hyprland
+import Quickshell.Services.Pipewire
 import Quickshell.Io
 import QtQuick 
 import QtQuick.Controls 
@@ -40,8 +39,8 @@ Variants {
             function recomputeHover() {
                 const inBar = pointInRect(cursorX, cursorY, barLeft, barTop, barWidth, barHeight)
                 const inSlideout = pointInRect(cursorX, cursorY, slideoutLeft, slideoutTop, slideoutWidth, slideoutHeight)
-                const inText = (barLeft+barWidth*0.5 - clock.width * 0.5 <= cursorX && cursorX <= barLeft+barWidth*0.5 + clock.width * 0.5)
-                slideoutShown = ((inBar || inSlideout) && slideoutShown) || (inText && inBar)
+                const inText = (barLeft+barWidth*0.5 - clock.width * 0.5 <= cursorX && cursorX <= barLeft+barWidth*0.5 + clock.width * 0.5 && cursorY <= 2)
+                slideoutShown = ((inBar || inSlideout) && slideoutShown) || (inText)
             }
 
             // Poll the global cursor position. This is compositor-driven
@@ -133,7 +132,7 @@ Variants {
                 property int reqHeight: 35
                 property string fontFamily: "JetBrainsMono Nerd Font"
                 property int fontSize: 12
-                property int activeWS: 1
+                property int activeWS: Hyprland.focusedWorkspace.name
 
                 screen: scope.modelData
                 color: "transparent"
@@ -197,12 +196,106 @@ Variants {
 
                                 onWheel: {
                                     if (wheel.angleDelta.y > 0) {
-                                       Hyprland.dispatch("hl.dsp.focus({ workspace = \"e+1\" })")
+                                        Hyprland.dispatch("hl.dsp.focus({ workspace = \"e+1\" })")
                                     } else if (wheel.angleDelta.y < 0) {
                                         Hyprland.dispatch("hl.dsp.focus({ workspace = \"e-1\" })")
                                     }
                                 }
                             }
+                        }
+                    }
+
+                    Item {
+                        Image {
+                            x: vol_txt.x - this.width - 5
+                            y: (root.reqHeight - this.height) / 2
+                            height: root.fontSize * 1.25
+                            fillMode: Image.PreserveAspectFit
+                            source: "./Speaker_Icon.svg"
+
+                            MouseArea {
+                                anchors.fill: parent
+                                onPressed: {
+                                    Quickshell.execDetached("pavucontrol")    
+                                }
+                            }
+                        }
+
+                        Text {
+                            id: vol_txt
+                            x: vol.x - this.width - 10
+                            y: (root.reqHeight - this.height) / 2
+                            font { family: root.fontFamily; pixelSize: root.fontSize * 1 }
+                            color: "#fff"
+                            text: (Pipewire.defaultAudioSink.audio.muted) ? 0 : vol.value
+                            
+
+                            MouseArea {
+                                anchors.fill: parent
+                                onPressed: {
+                                    Quickshell.execDetached("pavucontrol")
+                                }
+
+                                hoverEnabled: true
+                            }
+                        }
+
+                        PwObjectTracker {
+                            objects: [ Pipewire.defaultAudioSink ]
+                        }
+
+                        Slider
+                        {
+                            id: vol
+                            x: clock.x - this.width - 50
+                            y: (root.reqHeight - this.height) / 2 + 2
+                            from: 0
+                            to: 100
+                            stepSize: 1
+                            value: (Pipewire.defaultAudioSink.audio.muted) ? 0 : Math.round(Pipewire.defaultAudioSink.audio.volume * 100)
+
+
+                            Connections {
+                                target: Pipewire.defaultAudioSink ? Pipewire.defaultAudioSink.audio : null
+                                function onVolumeChanged() {
+                                    if (!vol.pressed)
+                                        vol.value = (Pipewire.defaultAudioSink.audio.muted) ? 0 : Math.round(Pipewire.defaultAudioSink.audio.volume * 100)
+                                }
+                            }
+
+                            background: Rectangle {
+                                height: 8
+                                implicitWidth: 200
+                                radius: 4
+                                color: '#5d2000'
+                                Rectangle {
+                                    width: vol.visualPosition * parent.width
+                                    height: parent.height
+                                    color: '#e7281e'
+                                    radius: 4
+                                }
+
+                                
+                            }
+
+                            Timer {
+                                id: throttle
+                                property real pendingValue: vol.value
+                                property real lastSent: -1
+                                interval: 100 // ~60Hz; raise to 33 (~30Hz) if still choppy
+                                running: true
+                                repeat: true
+                                onTriggered: {
+                                    if (pendingValue !== lastSent && Pipewire.defaultAudioSink && Pipewire.defaultAudioSink.ready) {
+                                        Pipewire.defaultAudioSink.audio.volume = pendingValue / 100
+                                        lastSent = pendingValue
+                                    }
+                                }
+                            }
+
+                            handle.visible: false
+                            onMoved: throttle.pendingValue = vol.value
+                            wheelEnabled: true
                         }
                     }
 
@@ -280,7 +373,7 @@ Variants {
                     }
                 }
 
-                // Polls for Workspacewidget
+                // Polls for Workspacewidget dont use Hyprland.workspaces because the ordering is of workspaces is wrong
                 Process {
                     id: get
                     command: ["bash", "/home/farouk/Documents/QuickShell/getWorkspaces.sh"]
@@ -295,22 +388,6 @@ Variants {
                     running: true
                     repeat: true
                     onTriggered: get.running = true
-                }
-
-                Process {
-                    id: getAWS
-                    command: ["bash", "/home/farouk/Documents/QuickShell/getActiveWS.sh"]
-                    running: true
-                    stdout: StdioCollector {
-                        onStreamFinished: root.activeWS = this.text
-                    }
-                }
-
-                Timer {
-                    interval: 100
-                    running: true
-                    repeat: true
-                    onTriggered: getAWS.running = true
                 }
             }
         }
