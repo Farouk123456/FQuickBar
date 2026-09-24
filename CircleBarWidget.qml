@@ -58,8 +58,8 @@ Item {
     // Animate value changes
     Behavior on value {
         NumberAnimation {
-            duration: 500
-            easing.type: Easing.InOutCubic
+            duration: 250
+            easing.type: Easing.Linear
         }
     }
 }

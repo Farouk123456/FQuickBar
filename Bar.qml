@@ -3,10 +3,12 @@ import Quickshell
 import QtQuick
 import QtQuick.Controls
 
-// TODO: make slideout widgets use acctual data fix their positioning make beter color interpolation add mediaplayer thingy or smth and put the widgets into their own files
+// TODO: fix their positioning make beter color interpolation add mediaplayer thingy or smth
 
 Scope {
     WorkspacesDataGetter { id: wkData }
+    DriveDataGetter { id: driveData }
+    ResourceDataGetter { id: resData }
 
     Variants {
         model: Quickshell.screens;
@@ -92,149 +94,22 @@ Scope {
                         running: !mouseW.slideoutShown 
                     }
 
-                    CircleBarWidget {
-                        id: cpu
-                        width: 150
-                        height: 150
-                        value: 0.1
-                        lineWidth: 15
-                        primaryColor: Qt.hsva(Math.pow(1 - this.value, 2) * 204 / 360, 0.83, 1)
-                        secondaryColor: "#15e0e0e0"
-                        textColor: "#fff"
+                    ResourceWidget {
+                        id: res
+                        fontSize: scope.fontSize
                         fontFamily: scope.fontFamily
-                        fontSize: scope.fontSize * 1.75
-                        text: "CPU " + Math.round(cpu.value * 100) + "%"
-                        x: 370
-                        y: (slideout.height - this.height) / 4
-
-                        Text {
-                            text: " 65°C"
-                            x: (cpu.width  - this.width) / 2 
-                            y: 3 * (slideout.height - this.height) / 4
-                            color: "#fff"
-                            font.family: scope.fontFamily
-                            font.pixelSize: scope.fontSize * 1.75
-                        }
+                        height: slideout.height
+                        y: (slideout.height - 150) / 4
+                        resData: resData.data
                     }
 
-                    CircleBarWidget {
-                        id: ram
-                        width: 150
-                        height: 150
-                        value: 0.4
-                        lineWidth: 15
-                        primaryColor: Qt.hsva(Math.pow(1 - this.value, 2) * 204 / 360, 0.83, 1)
-                        secondaryColor: "#15e0e0e0"
-                        textColor: "#fff"
-                        fontFamily: scope.fontFamily
-                        fontSize: scope.fontSize * 1.75
-                        text: "RAM " + Math.round(cpu.value * 100) + "%"
-                        x: cpu.x + 180
-                        y: (slideout.height - this.height) / 4
-
-                        Text {
-                            text: "16.4 / 32 GB"
-                            x: (cpu.width  - this.width) / 2 
-                            y: 3 * (slideout.height - this.height) / 4
-                            color: "#fff"
-                            font.family: scope.fontFamily
-                            font.pixelSize: scope.fontSize * 1.75
-                        }
-                    }
-
-                    CircleBarWidget {
-                        id: gpu
-                        width: 150
-                        height: 150
-                        value: 0.01
-                        lineWidth: 15
-                        primaryColor: Qt.hsva(Math.pow(1 - this.value, 2) * 204 / 360, 0.83, 1)
-                        secondaryColor: "#15e0e0e0"
-                        textColor: "#fff"
-                        fontFamily: scope.fontFamily
-                        fontSize: scope.fontSize * 1.75
-                        text: "GPU " + Math.round(cpu.value * 100) + "%"
-                        x: ram.x + 180
-                        y: (slideout.height - this.height) / 4
-
-                        Text {
-                            text: " 43°C"
-                            x: (cpu.width  - this.width) / 2 
-                            y: 3 * (slideout.height - this.height) / 4
-                            color: "#fff"
-                            font.family: scope.fontFamily
-                            font.pixelSize: scope.fontSize * 1.75
-                        }
-                    }
-
-                    Repeater {
-                        id: drive
-                        model: [
-  {
-    "Filesystem": "/dev/nvme0n1p3",
-    "Type": "ext4",
-    "Size": "911G",
-    "Used": "367G",
-    "Avail": "501G",
-    "Use%": "43%",
-    "Mounted": "/"
-  },
-  {
-    "Filesystem": "/dev/sda1",
-    "Type": "ext4",
-    "Size": "229G",
-    "Used": "144G",
-    "Avail": "73G",
-    "Use%": "67%",
-    "Mounted": "/mnt/Backup"
-  },
-  {
-    "Filesystem": "/dev/sdc1",
-    "Type": "ext4",
-    "Size": "469G",
-    "Used": "246G",
-    "Avail": "200G",
-    "Use%": "56%",
-    "Mounted": "/mnt/Back"
-  }]
-                        delegate: ProgressBar {
-                            required property var modelData
-                            required property int index
-
-                            id: control
-                            value: parseInt(modelData["Use%"]) / 100
-                            x: scope.slideoutWidth - 300 - gpu.y
-                            y: gpu.y + ((slideout.panelHeight - gpu.y) / drive.count) * index
-                            
-                            
-                            height: scope.reqHeight * 0.2
-                            width: 300
-                            
-                            background: Rectangle {
-                                color: "#15e0e0e0"
-                                radius: parent.height / 2
-                            }
-
-                            contentItem: Item { Rectangle {
-                                color: '#2099d0'
-                                radius: parent.height / 2
-                                width: control.visualPosition * parent.width
-                                height: parent.height
-                            }}
-
-                            Text {
-                                text: parent.modelData.Filesystem
-                                color: "#fff"
-                                y: 15
-                            }
-
-                            Text {
-                                text: parent.modelData.Used + " / " + parent.modelData.Size
-                                color: "#fff"
-                                y: 15
-                                x: 300 - this.width - 5
-                            }
-                        }
+                    StorageWidget
+                    {
+                        driveData: driveData.data
+                        progBarHeight: scope.reqHeight * 0.2
+                        implicitHeight: slideout.panelHeight - this.y
+                        y: res.y
+                        x: slideout.width - res.y
                     }
                 }
             }
@@ -257,8 +132,8 @@ Scope {
                     anchors.fill: parent
                     anchors.topMargin: 2
                     anchors.bottomMargin: 2
-                    anchors.leftMargin: 10
-                    anchors.rightMargin: 10
+                    anchors.leftMargin: 5
+                    anchors.rightMargin: 5
 
                     border {
                         width: 2
