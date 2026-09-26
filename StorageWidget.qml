@@ -24,7 +24,7 @@ Repeater {
         width: 300
         
         background: Rectangle {
-            color: "#15e0e0e0"
+            color: "#25e0e0e0"
             radius: parent.height / 2
         }
 

@@ -1,5 +1,6 @@
+import Quickshell
 import QtQuick
-                    
+
 Item {
     id: scope
     required property string fontFamily
@@ -28,6 +29,11 @@ Item {
             font.family: scope.fontFamily
             font.pixelSize: scope.fontSize * 1.75
         }
+
+        MouseArea {
+            anchors.fill: parent
+            onClicked: Quickshell.execDetached("gnome-system-monitor")
+        }
     }
 
     CircleBarWidget {
@@ -52,6 +58,11 @@ Item {
             font.family: scope.fontFamily
             font.pixelSize: scope.fontSize * 1.75
         }
+
+        MouseArea {
+            anchors.fill: parent
+            onClicked: Quickshell.execDetached("gnome-system-monitor")
+        }
     }
 
     CircleBarWidget {
@@ -75,6 +86,11 @@ Item {
             color: "#fff"
             font.family: scope.fontFamily
             font.pixelSize: scope.fontSize * 1.75
+        }
+    
+        MouseArea {
+            anchors.fill: parent
+            onClicked: Quickshell.execDetached("gnome-system-monitor")
         }
     }
 }

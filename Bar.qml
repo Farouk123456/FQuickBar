@@ -2,7 +2,7 @@ pragma ComponentBehavior: Bound
 import Quickshell
 import QtQuick
 
-// TODO: fix their positioning make beter color interpolation add mediaplayer thingy or smth
+// TODO: fix their positioning make beter color interpolation
 
 Scope {
     WorkspacesDataGetter { id: wkData }
@@ -93,12 +93,19 @@ Scope {
                         running: !mouseW.slideoutShown 
                     }
 
+                    MediaWidget {
+                        x: (slideout.height - 150) / 4
+                        anchors.verticalCenter: parent.verticalCenter
+                        anchors.verticalCenterOffset: -15
+                    }                    
+
+
                     ResourceWidget {
                         id: res
                         fontSize: scope.fontSize
                         fontFamily: scope.fontFamily
                         height: slideout.height
-                        x: 370
+                        x:  (slideout.width - 510) / 2
                         y: (slideout.height - 150) / 4
                         resData: resData.data
                     }
@@ -110,6 +117,7 @@ Scope {
                         implicitHeight: slideout.panelHeight - this.y
                         y: res.y
                         x: slideout.width - res.y
+
                     }
                 }
             }
