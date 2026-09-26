@@ -1,5 +1,4 @@
 pragma ComponentBehavior: Bound
-import Quickshell
 import QtQuick
 
 Item {
@@ -58,8 +57,8 @@ Item {
     // Animate value changes
     Behavior on value {
         NumberAnimation {
-            duration: 250
-            easing.type: Easing.Linear
+            duration: 1000
+            easing.type: Easing.Bezier
         }
     }
 }

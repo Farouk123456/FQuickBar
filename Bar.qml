@@ -1,7 +1,6 @@
 pragma ComponentBehavior: Bound
 import Quickshell
 import QtQuick
-import QtQuick.Controls
 
 // TODO: fix their positioning make beter color interpolation add mediaplayer thingy or smth
 
@@ -99,6 +98,7 @@ Scope {
                         fontSize: scope.fontSize
                         fontFamily: scope.fontFamily
                         height: slideout.height
+                        x: 370
                         y: (slideout.height - 150) / 4
                         resData: resData.data
                     }

@@ -18,7 +18,7 @@ Item {
         fontFamily: scope.fontFamily
         fontSize: scope.fontSize * 1.75
         text: "CPU " + Math.round(cpu.value * 100) + "%"
-        x: 370
+        
 
         Text {
             text: " " + Math.round(scope.resData.cpu.temp) + "°C"
@@ -43,7 +43,6 @@ Item {
         fontSize: scope.fontSize * 1.75
         text: "RAM " + Math.round(ram.value * 100) + "%"
         x: cpu.x + 180
-        //y: (scope.height - this.height) / 4
 
         Text {
             text: (scope.resData.ram.used_mb / 1000).toFixed(2) + " / " +  Math.round(scope.resData.ram.total_mb / 1000) + " GB"
@@ -68,7 +67,6 @@ Item {
         fontSize: scope.fontSize * 1.75
         text: "GPU " + Math.round(gpu.value * 100) + "%"
         x: ram.x + 180
-        //y: (scope.height - this.height) / 4
 
         Text {
             text: " " + Math.round(scope.resData.gpu[0].temp) + "°C"
