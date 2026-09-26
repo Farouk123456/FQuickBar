@@ -10,7 +10,7 @@ Item {
         id: cpu
         width: 150
         height: 150
-        value: scope.resData.cpu.usage / 100
+        value: (typeof scope.resData.cpu !== "undefined") ? scope.resData.cpu.usage / 100 : 0
         lineWidth: 15
         primaryColor: Qt.hsva(Math.pow(1 - this.value, 2) * 204 / 360, 0.83, 1)
         secondaryColor: "#25e0e0e0"
@@ -21,7 +21,7 @@ Item {
         
 
         Text {
-            text: " " + Math.round(scope.resData.cpu.temp) + "°C"
+            text: " " + Math.round((typeof scope.resData.cpu !== "undefined") ? scope.resData.cpu.temp : 0) + "°C"
             x: (cpu.width  - this.width) / 2 
             y: 3 * (scope.height - this.height) / 4
             color: "#fff"
@@ -34,7 +34,7 @@ Item {
         id: ram
         width: 150
         height: 150
-        value: scope.resData.ram.usage / 100
+        value: (typeof scope.resData.cpu !== "undefined") ? scope.resData.ram.usage / 100 : 0
         lineWidth: 15
         primaryColor: Qt.hsva(Math.pow(1 - this.value, 2) * 204 / 360, 0.83, 1)
         secondaryColor: "#25e0e0e0"
@@ -45,7 +45,7 @@ Item {
         x: cpu.x + 180
 
         Text {
-            text: (scope.resData.ram.used_mb / 1000).toFixed(2) + " / " +  Math.round(scope.resData.ram.total_mb / 1000) + " GB"
+            text: (((typeof scope.resData.cpu !== "undefined") ? scope.resData.ram.used_mb : 0) / 1000).toFixed(2) + " / " +  Math.round(((typeof scope.resData.cpu !== "undefined") ? scope.resData.ram.total_mb : 0) / 1000) + " GB"
             x: (cpu.width  - this.width) / 2 
             y: 3 * (scope.height - this.height) / 4
             color: "#fff"
@@ -58,7 +58,7 @@ Item {
         id: gpu
         width: 150
         height: 150
-        value: scope.resData.gpu[0].usage / 100
+        value: (typeof scope.resData.cpu !== "undefined") ? scope.resData.gpu[0].usage / 100 : 0
         lineWidth: 15
         primaryColor: Qt.hsva(Math.pow(1 - this.value, 2) * 204 / 360, 0.83, 1)
         secondaryColor: "#25e0e0e0"
@@ -69,7 +69,7 @@ Item {
         x: ram.x + 180
 
         Text {
-            text: " " + Math.round(scope.resData.gpu[0].temp) + "°C"
+            text: " " + Math.round((typeof scope.resData.cpu !== "undefined") ? scope.resData.gpu[0].temp : 0) + "°C"
             x: (cpu.width  - this.width) / 2 
             y: 3 * (scope.height - this.height) / 4
             color: "#fff"
