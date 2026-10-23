@@ -8,7 +8,39 @@ Column {
     id: mp
     spacing: 30
 
-    property var modelData: Mpris.players.values[0]
+    function getBestPlayer() {
+        const players = Mpris.players.values
+
+        if (players.length === 0)
+            return null
+
+        let best = null;
+        let bestScore = -1
+
+        for (let i = 0; i < players.length; i++) {
+            const p = players[i]
+            let score = 0;
+
+            if (p.trackTitle) score += 100
+            if (p.trackArtist) score++
+            if (p.trackAlbum) score++
+            if (p.trackArtUrl) score++
+            if (p.length > 0) score++
+            if (p.positionSupported) score++
+
+            if (score > bestScore) {
+                bestScore = score;
+                best = p;
+            }
+        }
+
+        if (!best.trackTitle)
+            return null 
+
+        return best
+    }
+
+    property var modelData: getBestPlayer()
 
     Row {
         spacing: 10
@@ -87,7 +119,7 @@ Column {
                 }
             }
 
-            source: mp.modelData?.trackArtUrl || ""
+            source: mp.modelData?.trackArtUrl || "/home/farouk/Documents/QuickShell/coverart.png"
             sourceSize: Qt.size(120,120)
             fillMode: Image.FillMode.Pad
             height: 120

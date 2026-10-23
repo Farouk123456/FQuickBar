@@ -8,7 +8,7 @@ Scope {
 
     Process {
         id: get
-        command: ["bash", "getWorkspaces.sh"]
+        command: ["bash", "/home/farouk/Documents/QuickShell/getWorkspaces.sh"]
         running: true
         stdout: StdioCollector {
             onStreamFinished: root.workspaces = JSON.parse(this.text)

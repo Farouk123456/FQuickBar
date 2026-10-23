@@ -8,7 +8,7 @@ Scope {
 
     Process {
         id: get
-        command: ["bash", "getResData.sh"]
+        command: ["bash", "/home/farouk/Documents/QuickShell/getResData.sh"]
         running: true
         stdout: StdioCollector {
             onStreamFinished: root.data = JSON.parse(this.text)
